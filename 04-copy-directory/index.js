@@ -1,34 +1,33 @@
 const path = require('path');
-const { mkdir, unlink, readdir, copyFile } = require('fs/promises');
+const { mkdir, readdir, copyFile, rm } = require('fs/promises');
 
 const originFolderName = 'files';
 const pathToOriginFolder = path.join(__dirname, originFolderName);
 const pathToCopyFolder = path.join(__dirname, `${originFolderName}-copy`);
 
-async function clearDir(pathToDir) {
-  const files = await readdir(pathToDir);
-  for (const file of files) {
-    await unlink(path.join(pathToDir, file));
-  }
-}
-
-async function copyDir(pathToOriginDir, pathToCopyDir) {
+async function copyDir(originDirPath, copyDirPath) {
   try {
-    await mkdir(pathToCopyDir, { recursive: true});
-    await clearDir(pathToCopyDir);
+    const dirInfo = await readdir(originDirPath, {withFileTypes: true});
+    await mkdir(copyDirPath);
 
-    const files = await readdir(pathToOriginDir);
-    files.forEach(file => {
-      const originFilePath = path.join(pathToOriginDir, file);
-      const copyFilePath = path.join(pathToCopyDir, file);
-      copyFile(originFilePath, copyFilePath);
-    });
+    for (const item of dirInfo) {
+      const itemSourcePath = path.join(originDirPath, item.name);
+      const itemDistPath = path.join(copyDirPath, item.name);
 
-    console.log('Dir is copied');
+      if (item.isDirectory()) {
+        await copyDir(itemSourcePath, itemDistPath);
+      } else {
+        await copyFile(itemSourcePath, itemDistPath);
+      }
+    }
 
   } catch(err) {
     console.error(err);
   }
 }
 
-copyDir(pathToOriginFolder, pathToCopyFolder);
+(async () => {
+  await rm(pathToCopyFolder, {force: true, recursive: true});
+  await copyDir(pathToOriginFolder, pathToCopyFolder);
+  console.log('Directory copied');
+})();
