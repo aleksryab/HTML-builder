@@ -50,14 +50,14 @@ async function buildCss() {
   }
 }
 
-async function copyDir(sourceDir, distDir) {
+async function copyDir(sourceDirPath, distDirPath) {
   try {
-    const dirInfo = await readdir(sourceDir, {withFileTypes: true});
-    await mkdir(distDir);
+    const dirInfo = await readdir(sourceDirPath, {withFileTypes: true});
+    await mkdir(distDirPath);
 
     for (const item of dirInfo) {
-      const itemSourcePath = path.join(sourceDir, item.name);
-      const itemDistPath = path.join(distDir, item.name);
+      const itemSourcePath = path.join(sourceDirPath, item.name);
+      const itemDistPath = path.join(distDirPath, item.name);
 
       if (item.isDirectory()) {
         await copyDir(itemSourcePath, itemDistPath);
