@@ -1,17 +1,13 @@
 const path = require('path');
 const { mkdir, readdir, readFile, appendFile, writeFile, copyFile, rm } = require('fs/promises');
 
-
 const distPath = path.join(__dirname, 'project-dist');
-const templatePath = path.join(__dirname, 'template.html');
-const componentsPath = path.join(__dirname, 'components');
-const assetsSourcePath = path.join(__dirname, 'assets');
-const assetsDistPath = path.join(distPath, 'assets');
-const stylesSourcePath = path.join(__dirname, 'styles');
-const stylesBundlePath = path.join(distPath, 'style.css');
 
 async function buildHtml() {
   try {
+    const templatePath = path.join(__dirname, 'template.html');
+    const componentsPath = path.join(__dirname, 'components');
+
     const template = await readFile(templatePath, {encoding: 'utf-8'});
     const componentRegExp = /{{(.*)}}/g;
     const componentsNames = template.match(componentRegExp).map(name => name.replace(/[{}]/g, ''));
@@ -33,6 +29,9 @@ async function buildHtml() {
 
 async function buildCss() {
   try {
+    const stylesSourcePath = path.join(__dirname, 'styles');
+    const stylesBundlePath = path.join(distPath, 'style.css');
+
     const files = await readdir(stylesSourcePath);
     const styles = files.filter(file => path.extname(file) === '.css');
 
@@ -72,6 +71,9 @@ async function copyDir(sourceDirPath, distDirPath) {
 }
 
 async function copyAssets() {
+  const assetsSourcePath = path.join(__dirname, 'assets');
+  const assetsDistPath = path.join(distPath, 'assets');
+
   await copyDir(assetsSourcePath, assetsDistPath);
   console.log('Assets copied...');
 }
